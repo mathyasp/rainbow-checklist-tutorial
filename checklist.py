@@ -12,6 +12,12 @@
 
 # my_fun_function('Hello World')
 
+# Library to be able to clear terminal
+import os
+
+# Library to be able to color text in terminal
+from termcolor import colored
+
 # Create, Read, Update, and Destroy (CRUD)
 ## Create 
 checklist = list()
@@ -41,7 +47,14 @@ def destroy(index):
 def list_all_items():
     index = 0
     for list_item in checklist:
-        print("{} {}".format(index, list_item))
+        string = checklist[index]
+        if string[0] == "√":
+            string = string[2:]
+        else:
+            string = string
+        split_string = string.split()
+        color = split_string[0]
+        print(colored("{} {}".format(index, list_item), color))
         index += 1
 
 ## Mark items as completed
@@ -50,26 +63,83 @@ def mark_completed(index):
     update(index, checked_item)
     return checklist[index]
 
+## Unmark items
+def unmark(index):
+    checked_item = checklist[index]
+    is_not_marked = True
+    while is_not_marked:
+        if checked_item[0] == "√":
+            is_not_marked = False
+            unchecked_item = checked_item[2:]
+            update(index, unchecked_item)
+            return checklist[index]
+        elif index == 'Q' or index == 'q':
+                exit()
+        else:
+            print("Please pick a checked item. Press Q to quit\n")
+            index = (user_input("Index number? "))
 
+## Get input from the user
 def user_input(prompt):
-    # the input function will display a message in the terminal
-    # and wait for user input.
     user_input = input(prompt)
     return user_input
+
+## Check if index input by the user is valid
+def is_input_valid(input_index):
+    is_not_valid = True
+    while is_not_valid:
+        if input_index.isdigit() and int(input_index) in range(0, len(checklist)):
+            is_not_valid = False
+            return int(input_index)
+        elif input_index == 'Q' or input_index == 'q':
+            exit()
+        else:
+            print("Please input a valid index number. Press Q to quit\n")
+            input_index = (user_input("Index number? "))
+            
 
 ## Select which functions to run
 def select(function_code):
     # Create item
-    if function_code == "C":
+    if function_code == "A":
         input_item = user_input("Input item: ")
         create(input_item)
+        os.system('clear')
 
     # Read item
     elif function_code == "R":
-        item_index = int(user_input("Index Number? "))
-
-        # Remember that item_index must actually exist or our program will crash.
+        item_index = (user_input("Index number? "))
+        item_index = is_input_valid(item_index)
         read(item_index)
+
+    # Update item
+    elif function_code == "C":
+        item_index = (user_input("Which index number would you like to change? "))
+        item_index = is_input_valid(item_index)
+        input_item = user_input("What item would you like to change it with? ")
+        update(item_index, input_item)
+        os.system('clear')
+
+    # Destroy item
+    elif function_code == "D":
+        item_index = (user_input("Which index number would you like to delete? "))
+        item_index = is_input_valid(item_index)
+        destroy(item_index)
+        os.system('clear')
+
+    # Mark item
+    elif function_code == "M":
+        item_index = (user_input("Which index number would you like to mark? "))
+        item_index = is_input_valid(item_index)
+        mark_completed(item_index)
+        os.system('clear')
+
+    # Unmark item
+    elif function_code == "U":
+        item_index = (user_input("Which index number would you like to unmark? "))
+        item_index = is_input_valid(item_index)
+        unmark(item_index)
+        os.system('clear')        
 
     # Print all items
     elif function_code == "P":
@@ -77,6 +147,7 @@ def select(function_code):
 
     # Stop the loop
     elif function_code == "Q":
+        os.system('clear')
         return False
 
     # Catch all
@@ -113,10 +184,10 @@ def test():
     # View results
     list_all_items()
 
-test()
+# test()
 
 running = True
 while running:
-    selection = user_input(
-        "Press C to add to list, R to Read from list, P to display list, and Q to quit:\n")
+    print("Your color options are grey, red, green, yellow, blue, magenta, cyan, and white.")
+    selection = user_input("Press:\nA to add to list,\nC to update an item on the list,\nD to delete an item from the list,\nR to read from list,\nM to mark item as completed,\nU to unmark item,\nP to display list,\nand Q to quit:\n").upper()
     running = select(selection)
